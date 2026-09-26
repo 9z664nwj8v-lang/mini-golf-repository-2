@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Golf Putting Tips (Workout)</title>
+  <style>
+    :root { --bg:#0b1220; --card:#111a2e; --text:#e8eefc; --muted:#a8b3d6; --accent:#7dd3fc; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:14px 14px 8px; }
+    h1 { font-size:18px; margin:0 0 6px; letter-spacing:.2px; }
+    .sub { color:var(--muted); font-size:12.5px; margin:0; line-height:1.35; }
+
+    .wrap { padding:0 14px 18px; max-width:520px; margin:0 auto; }
+
+    .topBar {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+      align-items:center;
+    }
+
+    select {
+      width:100%;
+      background:var(--card);
+      color:var(--text);
+      border:1px solid rgba(125,211,252,.25);
+      border-radius:12px;
+      padding:12px 12px;
+      font-size:16px;
+      outline:none;
+      appearance:none;
+    }
+
+    .navRow {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    button {
+      background:var(--card);
+      color:var(--text);
+      border:1px solid rgba(125,211,252,.25);
+      border-radius:14px;
+      padding:12px 10px;
+      font-size:16px;
+      font-weight:800;
+      outline:none;
+    }
+
+    .card {
+      margin-top:12px;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .pillRow { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill {
+      background: rgba(125,211,252,.12);
+      border: 1px solid rgba(125,211,252,.25);
+      color: var(--accent);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .generalRules { color:var(--muted); font-size:13px; margin-top:6px; line-height:1.35; }
+
+    .dotText { font-size:13px; color:var(--muted); margin-top:10px; }
+    .dotText strong { color:var(--accent); font-weight:900; }
+    .tipText { font-size:18px; line-height:1.45; margin-top:10px; white-space:pre-wrap; }
+
+    /* Workout hole selector */
+    .holeGrid {
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:8px;
+    }
+
+    .holeBtn {
+      padding:14px 0;
+      border-radius:14px;
+      font-size:16px;
+      font-weight:900;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      touch-action: manipulation;
+    }
+
+    .holeBtn.preview {
+      background: rgba(125,211,252,.10);
+      border-color: rgba(125,211,252,.45);
+    }
+
+    .holeBtn.active {
+      background: rgba(125,211,252,.18);
+      border-color: rgba(125,211,252,.75);
+      color: #eaf8ff;
+    }
+
+    .hintLine {
+      color:var(--muted);
+      font-size:12.5px;
+      margin-top:10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mini Golf Putting Tips</h1>
+    <p class="sub">Workout view: <b>tap-and-hold</b> a hole number to load its notecard.</p>
+  </header>
+
+  <div class="wrap">
+    <div class="topBar">
+      <div>
+        <select id="courseSel" aria-label="Select course"></select>
+      </div>
+      <div>
+        <select id="holeSel" aria-label="Select hole" style="width:100%;"></select>
+      </div>
+    </div>
+
+    <div class="navRow">
+      <button id="prevBtn" type="button">◀ Prev</button>
+      <button id="nextBtn" type="button">Next ▶</button>
+    </div>
+
+    <div class="holeGrid" id="holeGrid" aria-label="Hole selector"></div>
+    <div class="hintLine">Tip changes only when you hold (≈350ms) on a hole.</div>
+
+    <div class="card" role="region" aria-live="polite">
+      <div class="pillRow">
+        <div class="pill" id="courseLabel">Course</div>
+        <div class="pill" id="holeLabel">Hole</div>
+      </div>
+
+      <div class="generalRules" id="generalRules"></div>
+
+      <div class="dotText" id="dotText"></div>
+      <div class="tipText" id="tipText">Tap-and-hold a hole number.</div>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {
+      "Course 2": {
+        generalRules: "Always line up to the hole, set your stance the same. Revised 7/31/26",
+        holes: {
+          1: { dot: "Dot 6", tip: "Aim towards Left rail 3 feet before the 1st hump. Entire surfaces breaks severely L-to-R.\nSecond shot - soft put" },
+          2: { dot: "Dot 7", tip: "Aim at the L rail 2 feet before the point of the triange.\nAvoid hitting so hard that you end up near the back rail." },
+          3: { dot: "Dot 6/7", tip: "Hit very soft and right bank 1 foot before the crack in the sidewalk on the R rail.\nAvoid hitting so hard that you end up near the back rail.\nAim for the Octogon Rail." },
+          4: { dot: "Dot 6", tip: "Aim for L rail 18 inches before the first hump.\nhit to the back rail." },
+          5: { dot: "Dot 1", tip: "Aim at R and run along the rail just before the hump.\nHit pretty soft focusing on staying up in the back plateau.\nThe back rail is dead, so it doesn't bank off very hard." },
+          6: { dot: "Dot 6", tip: "Aim at L rail at the 1st crack in the sidewalk.\nFocus on speed to stay near the cup.\nOn 2nd putt from straight in front of the hole it will break about 2 inches to the R from a few feet away." },
+          7: { dot: "Dot 4", tip: "Aim straight to the Left edge of the hole.\nFocus on the right speed to end up between the 2nd and 3rd humps.\nVery soft putt." },
+          8: { dot: "Dot 4", tip: "Aim at the L rail at the crack.\nHit pretty hard. (Bank it to the left pain line on the turf.)" },
+          9: { dot: "Dot 4", tip: "Aim at R rail 2-3 feet before the cup.\nIt curves L and never hits the rail.\nHit soft." },
+          10:{ dot: "Dot 4", tip: "Aim straight.\nBack rail is dead, so hit harder and it will stay on the plateau.\nAim to the right paint on the brick." },
+          11:{ dot: "Dot 6", tip: "Aim 3 inches to the right of the cup.\nDon't hit hard.\nStay right of the hole." },
+          12:{ dot: "Dot 2", tip: "Aim at R rail 6 feet before the triangle.\nSurfaces slopes the L, so the ball won't hit the rail.\nFocus on speed." },
+          13:{ dot: "Dot 7", tip: "New Carpet, new rules.\nBank Left harder off the first crack." },
+          14:{ dot: "Dot 3", tip: "Aim a bit L of the cup.\nAnother approach is to aim at the crack near the R rail and it will go off the back rail toward the cup." },
+          15:{ dot: "Dot 4 or 5", tip: "New carpet/New pattern.\nHits are breaking left to right.\nSoft Putt.\nAim 2 inches R of the cup.\nGet speed right to stay on the plateau (pretty slow)." },
+          16:{ dot: "Dot 4", tip: "Aim a bit L of cup.\nHit soft so that it doesn't drop off the plateau.\nBe short of the hole." },
+          17:{ dot: "Dot 6", tip: "Aim at Left rail even with the circle or before it." },
+          18:{ dot: "Dot 4", tip: "Firm Putt.\nAim straight at the cup and hit hard enough to reach the cup because it should easily stay close for your 2nd putt." }
+        }
+      },
+
+      "Course 3": {
+        generalRules: "Course 3 - Always line up to the hole, set your stance the same. Revised 7/31/26",
+        holes: {
+          1:  { dot: "Dot 1 or 2", tip: "Firm and straight down seam…bank off back rail." },
+          2:  { dot: "Dot 6", tip: "Straight and Soft." },
+          3:  { dot: "Dot 4", tip: "Just end up in the back section preferably in the middle and go for a 2 putt." },
+          4:  { dot: "Dot 4", tip: "Aim 4 inches R of cup.\nFocus on speed to stay on the plateau.\nThere is a hill behind the hole, and it is better to be long than short." },
+          5:  { dot: "Dot 4", tip: "Very Soft putt,\nAim just L of the cup.\nOk to bank off back rail.\nMiddle-straight." },
+          6:  { dot: "Dot #6", tip: "Soft/medium hit, stay within 4 inches of the R rail." },
+          7:  { dot: "Dot 4", tip: "Aim just left cup.\nAvoid hitting too hard and ending up on the back plateau.\nMiddle-straight, soft speed putt. (Possible Ace)" },
+          8:  { dot: "Dot #2", tip: "Just hard enough to hit bank angle rail on the right." },
+          9:  { dot: "Dot 2", tip: "Aim at 2nd crack on R rail and hit very hard.\n(Hole in 1 or a 4)\nAimed 2nd shot right of the hole." },
+          10: { dot: "Dot 1", tip: "Aim at the end of R rail and it will break way left.\nFrom back L corner where you'll likely end up it will break 2 inches to the right.\nSpeed putt to hole or leave short, don't go long.\nHit with intention of an ACE." },
+          11: { dot: "Dot 3", tip: "Aim at sprinkler head on the L or sooner.\nThere is also a crack in the sidewalk on about the same line.\nYou want to stay L of the triangle for an easy 2." },
+          12: { dot: "Dot #2", tip: "Medium to soft putt.\nAim at point on R and let break to hole." },
+          13: { dot: "Dot 4", tip: "Aim 2 inches L of cup.\nMostly straight with some L to R break.\nGet behind the hole for second shot." },
+          14: { dot: "Dot 1", tip: "Aim straight 3 inches L of cup and try to stay on back plateau.\nFollow sheet.\nFirm off back rail. (Possible ACE)" },
+          15: { dot: "Dot 4", tip: "Aim 3 inches L of triangle and it will curve L off the first hump and then curve back to the R off the 2nd hump.\nMedium-Soft putt.\nLet the course do the work." },
+          16: { dot: "Dot 2", tip: "Aim 1 foot right of cup." },
+          17: { dot: "Dot 2", tip: "Aim a few inches L of the triangle on the R and it break back to the L to the hole.\nStay to the right of the hole, Leave it short." },
+          18: { dot: "Dot 6", tip: "Aim one foot from the left of the cup and it breaks to the R.\nTry to stay on the back plateau.\nL to R break." }
+        }
+      }
+    };
+
+    const courseSel = document.getElementById("courseSel");
+    const holeSel = document.getElementById("holeSel");
+    const holeGrid = document.getElementById("holeGrid");
+
+    const courseLabel = document.getElementById("courseLabel");
+    const holeLabel = document.getElementById("holeLabel");
+    const generalRules = document.getElementById("generalRules");
+    const dotText = document.getElementById("dotText");
+    const tipText = document.getElementById("tipText");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function buildCourseOptions() {
+      const courses = Object.keys(DATA);
+      courseSel.innerHTML = courses.map(c => `<option value="${c}">${c}</option>`).join("");
+    }
+
+    function buildHoleOptions() {
+      holeSel.innerHTML = Array.from({length:18}, (_,i)=>i+1)
+        .map(n => `<option value="${n}">Hole ${n}</option>`)
+        .join("");
+    }
+
+    function setHoleAndRender(h) {
+      h = Math.max(1, Math.min(18, Number(h)));
+      holeSel.value = String(h);
+      render();
+    }
+
+    function buildHoleGrid() {
+      holeGrid.innerHTML = "";
+
+      for (let n = 1; n <= 18; n++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "holeBtn";
+        btn.textContent = n;
+        btn.dataset.hole = String(n);
+
+        // Workout behavior: tap = preview highlight; hold (~350ms) = load card
+        let timer = null;
+        let lastCommitted = false;
+
+        const preview = () => {
+          const hole = Number(btn.dataset.hole);
+          // highlight preview only
+          [...holeGrid.querySelectorAll(".holeBtn")].forEach(b => {
+            const isPreview = Number(b.dataset.hole) === hole;
+            if (isPreview) b.classList.add("preview");
+          });
+          // remove preview from others
+          [...holeGrid.querySelectorAll(".holeBtn")].forEach(b => {
+            const isPreview = Number(b.dataset.hole) === hole;
+            if (!isPreview) b.classList.remove("preview");
+          });
+        };
+
+        const clearTimer = () => {
+          if (timer) clearTimeout(timer);
+          timer = null;
+        };
+
+        btn.addEventListener("touchstart", (e) => {
+          e.preventDefault(); // helps keep gesture consistent
+          lastCommitted = false;
+          clearTimer();
+          preview();
+          timer = setTimeout(() => {
+            lastCommitted = true;
+            setHoleAndRender(btn.dataset.hole);
+          }, 350);
+        }, { passive: false });
+
+        btn.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          clearTimer();
+          // if not committed, do nothing (preview stays briefly; render will clear preview during next render)
+          if (!lastCommitted) {
+            // keep preview highlight; optionally you can clear it:
+            // [...holeGrid.querySelectorAll(".holeBtn")].forEach(b => b.classList.remove("preview"));
+          }
+        }, { passive: false });
+
+        // Fallback for mouse / keyboard users:
+        btn.addEventListener("click", () => {
+          // If user clicks (desktop), treat it as "load"
+          setHoleAndRender(btn.dataset.hole);
+        });
+
+        btn.addEventListener("mouseleave", clearTimer);
+        btn.addEventListener("mousedown", (e) => {
+          // desktop long-press approximation
+          e.preventDefault();
+          lastCommitted = false;
+          clearTimer();
+          preview();
+          timer = setTimeout(() => {
+            lastCommitted = true;
+            setHoleAndRender(btn.dataset.hole);
+          }, 350);
+        });
+
+        btn.addEventListener("mouseup", (e) => {
+          e.preventDefault();
+          clearTimer();
+        });
+
+        holeGrid.appendChild(btn);
+      }
+    }
+
+    function render() {
+      const course = courseSel.value;
+      const hole = Number(holeSel.value);
+      const entry = DATA[course].holes[hole];
+
+      courseLabel.textContent = course;
+      holeLabel.textContent = `Hole ${hole}`;
+      generalRules.textContent = DATA[course].generalRules;
+
+      dotText.innerHTML = `<strong>Start from:</strong> ${entry.dot}`;
+      tipText.textContent = entry.tip;
+
+      // clear preview + set active
+      [...holeGrid.querySelectorAll(".holeBtn")].forEach(b => {
+        b.classList.remove("preview");
+        b.classList.toggle("active", Number(b.dataset.hole) === hole);
+      });
+    }
+
+    function init() {
+      buildCourseOptions();
+      buildHoleOptions();
+      buildHoleGrid();
+
+      courseSel.value = Object.keys(DATA)[0];
+      holeSel.value = "1";
+      render();
+    }
+
+    courseSel.addEventListener("change", () => render());
+    holeSel.addEventListener("change", () => render());
+
+    prevBtn.addEventListener("click", () => {
+      const h = Number(holeSel.value);
+      setHoleAndRender(h - 1);
+    });
+    nextBtn.addEventListener("click", () => {
+      const h = Number(holeSel.value);
+      setHoleAndRender(h + 1);
+    });
+
+    init();
+  </script>
+</body>
+</html>
